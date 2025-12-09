@@ -46,7 +46,7 @@ function handleDragMove(e: MouseEvent | TouchEvent) {
   dragEnd = getPointerPosition(e);
 }
 
-function handleDragEnd(e?: MouseEvent | TouchEvent) {
+function handleDragEnd(_e?: MouseEvent | TouchEvent) {
   if (isDragging && dragEnd) {
     // Set velocity in the direction of the dashed line (opposite drag direction)
     const dx = x - dragEnd.x;
