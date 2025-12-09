@@ -18,27 +18,35 @@ canvas.height = window.innerHeight;
 app.appendChild(canvas);
 
 // Add event listeners only after canvas is initialized
-canvas.addEventListener('mousedown', (e) => {
+
+function getPointerPosition(e: MouseEvent | TouchEvent): {x: number, y: number} {
+  const rect = canvas.getBoundingClientRect();
+  if (e instanceof MouseEvent) {
+    return {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    };
+  } else if (e instanceof TouchEvent) {
+    const touch = e.touches[0] || e.changedTouches[0];
+    return {
+      x: touch.clientX - rect.left,
+      y: touch.clientY - rect.top
+    };
+  }
+  return {x: 0, y: 0};
+}
+
+function handleDragStart(e: MouseEvent | TouchEvent) {
   isDragging = true;
-  const rect = canvas.getBoundingClientRect();
-  dragEnd = {
-    x: e.clientX - rect.left,
-    y: e.clientY - rect.top
-  };
-});
+  dragEnd = getPointerPosition(e);
+}
 
-canvas.addEventListener('mousemove', (e) => {
+function handleDragMove(e: MouseEvent | TouchEvent) {
   if (!isDragging) return;
-  const rect = canvas.getBoundingClientRect();
-  dragEnd = {
-    x: e.clientX - rect.left,
-    y: e.clientY - rect.top
-  };
-});
+  dragEnd = getPointerPosition(e);
+}
 
-
-let launched = false;
-canvas.addEventListener('mouseup', () => {
+function handleDragEnd(e?: MouseEvent | TouchEvent) {
   if (isDragging && dragEnd) {
     // Set velocity in the direction of the dashed line (opposite drag direction)
     const dx = x - dragEnd.x;
@@ -54,7 +62,19 @@ canvas.addEventListener('mouseup', () => {
   }
   isDragging = false;
   dragEnd = null;
-});
+}
+
+
+let launched = false;
+// Mouse events
+canvas.addEventListener('mousedown', handleDragStart);
+canvas.addEventListener('mousemove', handleDragMove);
+canvas.addEventListener('mouseup', handleDragEnd);
+
+// Touch events
+canvas.addEventListener('touchstart', handleDragStart);
+canvas.addEventListener('touchmove', handleDragMove);
+canvas.addEventListener('touchend', handleDragEnd);
 
 // Physics constants
 const GRAVITY = 980; // px/s^2
